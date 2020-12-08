@@ -25,6 +25,7 @@ class WeatherApiClient {
       throw HTTPException(res.statusCode, "unable to fetch weather data");
     }
     final weatherJson = json.decode(res.body);
+    print(weatherJson['name']);
     return weatherJson['name'];
   }
 
@@ -50,4 +51,5 @@ class WeatherApiClient {
     List<Weather> weathers = Weather.fromForecastJson(forecastJson);
     return weathers;
   }
+
 }

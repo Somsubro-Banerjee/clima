@@ -38,7 +38,8 @@ class ForecastHorizontal extends StatelessWidget {
                   DateTime.fromMillisecondsSinceEpoch(item.time * 1000)),
               '${item.temperature.as(AppStateContainer.of(context).temperatureUnit).round()}°',
               iconData: item.getIconData(),
-            )),
+            )
+            ),
           );
         },
       ),

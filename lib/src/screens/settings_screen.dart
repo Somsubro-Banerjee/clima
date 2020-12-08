@@ -9,7 +9,10 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppStateContainer.of(context).theme.primaryColor,
-        title: Text("Settings"),
+        title: Text("SETTINGS",
+        style: TextStyle(
+          fontSize: 30
+        ),),
       ),
       body: Container(
         padding: EdgeInsets.only(left: 10, right: 10, top: 15),
@@ -23,7 +26,7 @@ class SettingsScreen extends StatelessWidget {
                 style: TextStyle(
                   color: AppStateContainer.of(context).theme.accentColor,
                   fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                  fontSize: 25,
                 ),
               ),
             ),
@@ -96,11 +99,11 @@ class SettingsScreen extends StatelessWidget {
               padding:
                   const EdgeInsets.only(top: 15, left: 8, right: 8, bottom: 8),
               child: Text(
-                "Unit",
+                "UNIT",
                 style: TextStyle(
                   color: AppStateContainer.of(context).theme.accentColor,
                   fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                  fontSize: 25,
                 ),
               ),
             ),
@@ -205,6 +208,37 @@ class SettingsScreen extends StatelessWidget {
                 ],
               ),
             ),
+             Padding(
+              padding:
+                  const EdgeInsets.only(top: 15, left: 8, right: 8, bottom: 8),
+              child: Text(
+                "ABOUT",
+                style: TextStyle(
+                  color: AppStateContainer.of(context).theme.accentColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25,
+                ),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8), topRight: Radius.circular(8), bottomLeft: Radius.circular(8), bottomRight: Radius.circular(8)),
+                color: AppStateContainer.of(context)
+                    .theme
+                    .accentColor
+                    .withOpacity(0.1),
+              ),
+              height: 50,
+              padding: EdgeInsets.only(left: 10, right: 10),
+              child: Center(
+                child: Text(
+                  "Made with ❤, Powered By OpenWeatherMaps", 
+                  style: TextStyle(
+                      color: AppStateContainer.of(context).theme.accentColor)),
+              ),
+
+            )
           ],
         ),
       ),

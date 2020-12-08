@@ -1,3 +1,7 @@
+import 'package:clima/src/database/FirebaseWeatherupload.dart';
+import 'package:clima/src/screens/history_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:clima/main.dart';
 import 'package:clima/src/api/weather_api_client.dart';
@@ -13,7 +17,7 @@ import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-enum OptionsMenu { changeCity, settings }
+enum OptionsMenu { changeCity, settings, history }
 
 class WeatherScreen extends StatefulWidget {
   final WeatherRepository weatherRepository = WeatherRepository(
@@ -26,17 +30,30 @@ class WeatherScreen extends StatefulWidget {
 class _WeatherScreenState extends State<WeatherScreen>
     with TickerProviderStateMixin {
   WeatherBloc _weatherBloc;
-  String _cityName = 'bengaluru';
+  String _cityName;
   AnimationController _fadeController;
   Animation<double> _fadeAnimation;
+  SendDataToFirestrore _sendDataToFirestrore = SendDataToFirestrore();
+
+ Future<void> _signInAnomyously() async{
+  try{
+   final anonymousUser =  await FirebaseAuth.instance.signInAnonymously();
+   print(anonymousUser.user.uid);
+  } catch(e)
+  {
+    print(e);
+  }
+}
 
   @override
   void initState() {
     super.initState();
+    _signInAnomyously();
     _weatherBloc = WeatherBloc(weatherRepository: widget.weatherRepository);
     _fetchWeatherWithLocation().catchError((error) {
       _fetchWeatherWithCity();
     });
+     _sendDataToFirestrore.createRecord(_cityName);
     _fadeController = AnimationController(
         duration: const Duration(milliseconds: 1000), vsync: this);
     _fadeAnimation =
@@ -45,7 +62,17 @@ class _WeatherScreenState extends State<WeatherScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return StreamBuilder<User>(
+      
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot){
+        if(snapshot.connectionState == ConnectionState.active){
+          User user = snapshot.data;
+          if(user == null) {
+            print('User not found');
+          }
+        
+        return Scaffold(
         appBar: AppBar(
           backgroundColor: AppStateContainer.of(context).theme.primaryColor,
           elevation: 0,
@@ -73,11 +100,11 @@ class _WeatherScreenState extends State<WeatherScreen>
                 itemBuilder: (context) => <PopupMenuEntry<OptionsMenu>>[
                       PopupMenuItem<OptionsMenu>(
                         value: OptionsMenu.changeCity,
-                        child: Text("change city"),
+                        child: Text("Change City"),
                       ),
                       PopupMenuItem<OptionsMenu>(
                         value: OptionsMenu.settings,
-                        child: Text("settings"),
+                        child: Text("Settings"),
                       ),
                     ])
           ],
@@ -151,7 +178,16 @@ class _WeatherScreenState extends State<WeatherScreen>
                   }),
             ),
           ),
-        ));
+        ));}
+        else{
+          return Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            )
+          );
+        }
+      }
+    );
   }
 
   void _showCityChangeDialog() {
@@ -160,28 +196,42 @@ class _WeatherScreenState extends State<WeatherScreen>
         barrierDismissible: true,
         builder: (BuildContext context) {
           return AlertDialog(
-            backgroundColor: Colors.white,
-            title: Text('Change city', style: TextStyle(color: Colors.black)),
+            backgroundColor: Colors.grey.shade900,
+            title: Text('Change City', style: TextStyle(color: Colors.white)),
             actions: <Widget>[
               FlatButton(
                 child: Text(
-                  'ok',
-                  style: TextStyle(color: Colors.black, fontSize: 16),
+                  'Ok',
+                  style: TextStyle(color: Colors.green, fontSize: 16),
                 ),
                 onPressed: () {
                   _fetchWeatherWithCity();
+                  _sendDataToFirestrore.createRecord(_cityName);
+                  Navigator.of(context).pop();
+                },
+              ),
+              FlatButton(
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.red, fontSize: 16),
+                ),
+                onPressed: () {
                   Navigator.of(context).pop();
                 },
               ),
             ],
             content: TextField(
+              
               autofocus: true,
               onChanged: (text) {
                 _cityName = text;
               },
               decoration: InputDecoration(
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                  focusColor: Colors.white,
                   hintText: 'Name of your city',
-                  hintStyle: TextStyle(color: Colors.black),
+                  hintStyle: TextStyle(color: Colors.white),
                   suffixIcon: GestureDetector(
                     onTap: () {
                       _fetchWeatherWithLocation().catchError((error) {
@@ -191,12 +241,12 @@ class _WeatherScreenState extends State<WeatherScreen>
                     },
                     child: Icon(
                       Icons.my_location,
-                      color: Colors.black,
+                      color: Colors.white,
                       size: 16,
                     ),
                   )),
-              style: TextStyle(color: Colors.black),
-              cursorColor: Colors.black,
+              style: TextStyle(color: Colors.white),
+              cursorColor: Colors.white,
             ),
           );
         });
@@ -210,6 +260,9 @@ class _WeatherScreenState extends State<WeatherScreen>
       case OptionsMenu.settings:
         Navigator.of(context).pushNamed("/settings");
         break;
+      // case OptionsMenu.history:
+      //   Navigator.of(context).push(MaterialPageRoute(builder: (context) => History(),));
+      //   break;
     }
   }
 

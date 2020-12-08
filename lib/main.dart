@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:clima/src/screens/routes.dart';
 import 'package:clima/src/screens/weather_screen.dart';
@@ -7,14 +9,13 @@ import 'package:clima/src/utils/constants.dart';
 import 'package:clima/src/utils/converters.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-void main() {
+void main() async{
   BlocSupervisor().delegate = SimpleBlocDelegate();
+   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(AppStateContainer(child: WeatherApp()));
 }
-
-
-
+ 
 
 class SimpleBlocDelegate extends BlocDelegate {
   @override
@@ -25,6 +26,7 @@ class SimpleBlocDelegate extends BlocDelegate {
 }
 
 class WeatherApp extends StatelessWidget {
+ 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
